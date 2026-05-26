@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest manifest-version="0.1" xmlns="http://www.tableau.com/xml/extension_manifest">
+  <dashboard-extension id="com.stratadecision.waterfall" extension-version="1.0.0">
+    <default-locale>en_US</default-locale>
+    <name resource-id="name">Customer Waterfall</name>
+    <description>12-month customer waterfall chart with dynamic filter support</description>
+    <author name="Brenna Burzinski" email="" organization="Strata Decision" website=""/>
+    <min-api-version>1.4</min-api-version>
+    <source-location>
+      <!-- Replace this URL with your GitHub Pages URL after deployment -->
+      <url>https://YOUR-USERNAME.github.io/YOUR-REPO/waterfall_extension.html</url>
+    </source-location>
+    <icon>iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAALGPC/xhBQAAAAlwSFlzAAAOwAAADsABataJCQAAABl0RVh0U29mdHdhcmUAcGFpbnQubmV0IDQuMC4yMaGMsAAAAAd0SU5UAAAAAAhFU5oAAAAASUVORK5CYII=</icon>
+    <permissions>
+      <permission>full data</permission>
+    </permissions>
+  </dashboard-extension>
+</manifest>
