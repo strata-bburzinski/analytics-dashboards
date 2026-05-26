@@ -1,0 +1,38 @@
+name: Daily Dashboard Refresh
+
+on:
+  schedule:
+    - cron: '0 14 * * *'  # 2:00 PM UTC = 9:00 AM Central, runs after Snowflake refreshes at 6:30 AM Central
+  workflow_dispatch:        # allows manual trigger from GitHub Actions tab
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install snowflake-connector-python
+
+      - name: Write credentials file
+        run: |
+          echo "SNOWFLAKE_PASSWORD=${{ secrets.SNOWFLAKE_PASSWORD }}" > .dashboard_credentials
+          echo "GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}" >> .dashboard_credentials
+
+      - name: Run refresh script
+        run: python finance_dashboard_refresh.py
+
+      - name: Commit and push updated files
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add waterfall_extension.html finance_dashboard.html
+          git diff --cached --quiet || git commit -m "Auto-refresh: $(date +%Y-%m-%d)"
+          git push
