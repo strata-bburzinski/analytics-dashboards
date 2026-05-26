@@ -7,8 +7,7 @@
     <author name="Brenna Burzinski" email="" organization="Strata Decision" website=""/>
     <min-api-version>1.4</min-api-version>
     <source-location>
-      <!-- Replace this URL with your GitHub Pages URL after deployment -->
-      <url>https://YOUR-USERNAME.github.io/YOUR-REPO/waterfall_extension.html</url>
+      <url>https://strata-bburzinski.github.io/analytics-dashboards/waterfall_extension.html</url>
     </source-location>
     <icon>iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAALGPC/xhBQAAAAlwSFlzAAAOwAAADsABataJCQAAABl0RVh0U29mdHdhcmUAcGFpbnQubmV0IDQuMC4yMaGMsAAAAAd0SU5UAAAAAAhFU5oAAAAASUVORK5CYII=</icon>
     <permissions>
