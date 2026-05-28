@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Customer Waterfall</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@tableau/extensions-api@1/dist/tableau.extensions.1.latest.min.js"></script>
+<script src="tableau.extensions.1.latest.min.js"></script>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
@@ -124,6 +124,15 @@ async function loadAndRender() {
     document.getElementById('status').textContent = 'Error: ' + e.message;
   }
 }
+
+document.getElementById('status').textContent = 'tableau object: ' + (typeof tableau) +
+  ' | extensions: ' + (typeof tableau !== 'undefined' ? typeof tableau.extensions : 'n/a');
+
+setTimeout(() => {
+  if (document.getElementById('status').textContent.startsWith('tableau object:')) {
+    document.getElementById('status').textContent = 'Timed out — initializeAsync never called. tableau type: ' + typeof tableau;
+  }
+}, 5000);
 
 tableau.extensions.initializeAsync().then(() => {
   loadAndRender();
