@@ -97,11 +97,14 @@ async function loadAndRender() {
     const cols = {};
     data.columns.forEach((c, i) => { cols[c.fieldName] = i; });
 
+    // Show all column names for debugging
+    document.getElementById('status').textContent = 'Columns: ' + Object.keys(cols).join(' | ');
+
     const missing = ['Account ID', 'Is Active Now', 'Was Active 12m Ago']
       .filter(n => cols[n] === undefined);
     if (missing.length) {
       document.getElementById('status').textContent =
-        'Missing columns in "Waterfall Source": ' + missing.join(', ');
+        'Columns found: ' + Object.keys(cols).join(' | ');
       return;
     }
 
