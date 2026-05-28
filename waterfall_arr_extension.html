@@ -172,11 +172,13 @@ async function loadAndRender() {
     const cols = {};
     data.columns.forEach((c, i) => { cols[c.fieldName] = i; });
 
+    const allCols = data.columns.map(c => c.fieldName);
+
     const required = ['Account ID', 'Is Active Now', 'Was Active 12m Ago', '12M Ago', 'Current'];
     const missing = required.filter(n => cols[n] === undefined);
     if (missing.length) {
       document.getElementById('status').textContent =
-        'Missing columns in "' + WORKSHEET_NAME + '": ' + missing.join(', ');
+        'Missing: ' + missing.join(', ') + ' | Found: ' + allCols.join(', ');
       return;
     }
 
