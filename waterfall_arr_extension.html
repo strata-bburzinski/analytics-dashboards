@@ -114,12 +114,7 @@ async function loadAndRender() {
       const p = params.find(p => p.name === 'Financial Metric');
       if (p) metric = p.currentValue.formattedValue;
     } catch(e) { /* parameter read is best-effort */ }
-    if (!metric) {
-      const params = await dashboard.getParametersAsync().catch(() => []);
-      document.getElementById('title').textContent = 'Params found: ' + params.map(p => p.name).join(' | ');
-    } else {
-      document.getElementById('title').textContent = '12-Month ' + metric + ' Waterfall';
-    }
+    document.getElementById('title').textContent = '12-Month ' + (metric || 'Financial Metric') + ' Waterfall';
 
     const ws = dashboard.worksheets.find(w => w.name === WORKSHEET_NAME);
 
@@ -186,13 +181,14 @@ async function loadAndRender() {
   }
 }
 
-tableau.extensions.initializeAsync().then(() => {
+tableau.extensions.initializeAsync().then(async () => {
   loadAndRender();
   const dashboard = tableau.extensions.dashboardContent.dashboard;
   dashboard.worksheets.forEach(ws => {
     ws.addEventListener(tableau.TableauEventType.FilterChanged, loadAndRender);
   });
-  dashboard.addEventListener(tableau.TableauEventType.ParameterChanged, loadAndRender);
+  const params = await dashboard.getParametersAsync();
+  params.forEach(p => p.addEventListener(tableau.TableauEventType.ParameterChanged, loadAndRender));
 }).catch(err => {
   document.getElementById('status').textContent = 'Could not connect to Tableau: ' + err.message;
 });
