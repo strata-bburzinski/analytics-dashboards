@@ -40,25 +40,27 @@ function fmtM(v) {
 
 let chart = null;
 
-function renderChart(wf) {
-  // start, churn, newArr, expansion, contraction, end
+function renderChart(wf, metric) {
+  // Order: Start, Churn, Contraction, New, Expansion, End
   // Floats position each bar on the running balance
-  const afterChurn  = wf.start - wf.churn;
-  const afterNew    = afterChurn + wf.newArr;
-  const afterExp    = afterNew + wf.expansion;
+  const afterChurn       = wf.start - wf.churn;
+  const afterContraction = afterChurn - wf.contraction;
+  const afterNew         = afterContraction + wf.newArr;
 
   const floats = [
-    0,           // Start sits on 0
-    afterChurn,  // Churn: bar goes UP from afterChurn (represents the subtracted amount visually)
-    afterChurn,  // New: bar starts at afterChurn
-    afterNew,    // Expansion: bar starts at afterNew
-    afterExp - wf.contraction, // Contraction: bar goes UP from end position
-    0,           // End sits on 0
+    0,                // Start sits on 0
+    afterChurn,       // Churn base
+    afterContraction, // Contraction base
+    afterContraction, // New base
+    afterNew,         // Expansion base
+    0,                // End sits on 0
   ];
 
-  const bars      = [wf.start, wf.churn, wf.newArr, wf.expansion, wf.contraction, wf.end];
-  const barColors = [palette.teal, palette.red, palette.green, palette.green, palette.red, palette.teal];
-  const labels    = ['Start', 'Churn', 'New', 'Expansion', 'Contraction', 'End'];
+  const bars      = [wf.start, wf.churn, wf.contraction, wf.newArr, wf.expansion, wf.end];
+  const barColors = [palette.teal, palette.red, palette.red, palette.green, palette.green, palette.teal];
+  const startLabel = metric ? 'Starting ' + metric : 'Start';
+  const endLabel   = metric ? 'Ending ' + metric   : 'End';
+  const labels    = [startLabel, 'Churn', 'Contraction', 'New', 'Expansion', endLabel];
 
   if (chart) chart.destroy();
   chart = new Chart(document.getElementById('waterfall'), {
@@ -85,7 +87,7 @@ function renderChart(wf) {
             title: ctx => labels[ctx[0].dataIndex],
             label: ctx => {
               const i = ctx.dataIndex, v = bars[i];
-              if (i === 1 || i === 4) return ' -' + fmtM(v);
+              if (i === 1 || i === 2) return ' -' + fmtM(v);
               return ' ' + fmtM(v);
             }
           }
@@ -104,6 +106,15 @@ async function loadAndRender() {
   try {
     document.getElementById('status').textContent = 'Loading data...';
     const dashboard = tableau.extensions.dashboardContent.dashboard;
+
+    // Read the Financial Metric parameter value (e.g. "ARR" or "ATR")
+    let metric = null;
+    try {
+      const params = await dashboard.getParametersAsync();
+      const p = params.find(p => p.name === 'Financial Metric');
+      if (p) metric = p.currentValue.formattedValue;
+    } catch(e) { /* parameter read is best-effort */ }
+
     const ws = dashboard.worksheets.find(w => w.name === WORKSHEET_NAME);
 
     if (!ws) {
@@ -163,7 +174,7 @@ async function loadAndRender() {
       expansion:   expansionTotal,
       contraction: contractionTotal,
       end:         endTotal
-    });
+    }, metric);
   } catch(e) {
     document.getElementById('status').textContent = 'Error: ' + e.message;
   }
@@ -171,9 +182,11 @@ async function loadAndRender() {
 
 tableau.extensions.initializeAsync().then(() => {
   loadAndRender();
-  tableau.extensions.dashboardContent.dashboard.worksheets.forEach(ws => {
+  const dashboard = tableau.extensions.dashboardContent.dashboard;
+  dashboard.worksheets.forEach(ws => {
     ws.addEventListener(tableau.TableauEventType.FilterChanged, loadAndRender);
   });
+  dashboard.addEventListener(tableau.TableauEventType.ParameterChanged, loadAndRender);
 }).catch(err => {
   document.getElementById('status').textContent = 'Could not connect to Tableau: ' + err.message;
 });
