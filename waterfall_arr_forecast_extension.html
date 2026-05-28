@@ -19,7 +19,7 @@
 </style>
 </head>
 <body>
-<h2>Financial Metric Forecast Waterfall</h2>
+<h2 id="title">Financial Metric Forecast Waterfall</h2>
 <div id="status">Connecting to Tableau...</div>
 <canvas id="waterfall"></canvas>
 
@@ -130,6 +130,7 @@ async function loadAndRender() {
       const p = params.find(p => p.name === PARAM_NAME);
       if (p) metric = p.currentValue.formattedValue;
     } catch(e) { /* best-effort */ }
+    document.getElementById('title').textContent = (metric || 'Financial Metric') + ' Forecast Waterfall';
 
     const ws = dashboard.worksheets.find(w => w.name === WORKSHEET_NAME);
     if (!ws) {
