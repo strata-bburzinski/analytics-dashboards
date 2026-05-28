@@ -114,7 +114,12 @@ async function loadAndRender() {
       const p = params.find(p => p.name === 'Financial Metric');
       if (p) metric = p.currentValue.formattedValue;
     } catch(e) { /* parameter read is best-effort */ }
-    document.getElementById('title').textContent = '12-Month ' + (metric || 'Financial Metric') + ' Waterfall';
+    if (!metric) {
+      const params = await dashboard.getParametersAsync().catch(() => []);
+      document.getElementById('title').textContent = 'Params found: ' + params.map(p => p.name).join(' | ');
+    } else {
+      document.getElementById('title').textContent = '12-Month ' + metric + ' Waterfall';
+    }
 
     const ws = dashboard.worksheets.find(w => w.name === WORKSHEET_NAME);
 
