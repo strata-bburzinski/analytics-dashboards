@@ -117,25 +117,31 @@ async function loadAndRender() {
     const cols = {};
     data.columns.forEach((c, i) => { cols[c.fieldName] = i; });
 
-    // Show all column names to help debug mismatches
-    const allCols = data.columns.map(c => c.fieldName);
-
-    const required = ['Account ID', 'Is Active Now', 'Was Active 12m Ago', '12M Ago', 'Current'];
+    const required = ['Account ID', 'Is Active Now', 'Was Active 12m Ago', 'Measure Names', 'Measure Values'];
     const missing = required.filter(n => cols[n] === undefined);
     if (missing.length) {
       document.getElementById('status').textContent =
-        'Missing: ' + missing.join(', ') + ' | Found: ' + allCols.join(' | ');
+        'Missing: ' + missing.join(', ') + ' | Found: ' + data.columns.map(c => c.fieldName).join(' | ');
       return;
     }
 
-    let startTotal = 0, churnTotal = 0, newTotal = 0, expansionTotal = 0, contractionTotal = 0, endTotal = 0;
-
+    // First pass: collect per-account flags and ARR values from Measure Names/Values rows
+    const accounts = {};
     data.data.forEach(row => {
+      const id        = row[cols['Account ID']].formattedValue;
       const wasActive = Number(row[cols['Was Active 12m Ago']].value) >= 1;
       const isActive  = Number(row[cols['Is Active Now']].value)      >= 1;
-      const arrThen   = Number(row[cols['12M Ago']].value)  || 0;
-      const arrNow    = Number(row[cols['Current']].value)  || 0;
+      const measure   = row[cols['Measure Names']].formattedValue;
+      const val       = Number(row[cols['Measure Values']].value) || 0;
 
+      if (!accounts[id]) accounts[id] = { wasActive, isActive, arrThen: 0, arrNow: 0 };
+      if (measure === '12M Ago') accounts[id].arrThen = val;
+      if (measure === 'Current') accounts[id].arrNow  = val;
+    });
+
+    let startTotal = 0, churnTotal = 0, newTotal = 0, expansionTotal = 0, contractionTotal = 0, endTotal = 0;
+
+    Object.values(accounts).forEach(({ wasActive, isActive, arrThen, arrNow }) => {
       if (wasActive) startTotal += arrThen;
       if (isActive)  endTotal   += arrNow;
 
