@@ -14,12 +14,14 @@
          background: white; padding: 16px; font-size: 9pt; }
   h2 { font-family: 'Source Sans Pro', 'Segoe UI', sans-serif;
        font-size: 12pt; font-weight: 600; color: #374151; margin-bottom: 12px; }
+  #subtitle { font-size: 9pt; color: #6b7280; margin-bottom: 4px; min-height: 1.2em; }
   #status { font-size: 9pt; color: #9ca3af; margin-bottom: 8px; min-height: 1.2em; }
   canvas { max-height: 300px; }
 </style>
 </head>
 <body>
 <h2 id="title">Financial Metric Forecast Waterfall</h2>
+<div id="subtitle"></div>
 <div id="status">Connecting to Tableau...</div>
 <canvas id="waterfall"></canvas>
 
@@ -48,6 +50,17 @@ function fmtM(v) {
 }
 
 let chart = null;
+
+function renderSubtitle(start, end) {
+  const delta = end - start;
+  const pct   = start !== 0 ? (delta / Math.abs(start) * 100).toFixed(1) : null;
+  const sign  = delta >= 0 ? '+' : '';
+  const color = delta >= 0 ? '#16a34a' : '#dc2626';
+  const text  = 'Projected change: ' + sign + fmtM(delta) + (pct !== null ? '  (' + sign + pct + '%)' : '');
+  const el    = document.getElementById('subtitle');
+  el.textContent = text;
+  el.style.color = color;
+}
 
 function renderChart(wf, metric) {
   const m = metric || '';
@@ -115,6 +128,7 @@ function renderChart(wf, metric) {
       }
     }
   });
+  renderSubtitle(wf.start, wf.end);
   document.getElementById('status').textContent = 'Updated ' + new Date().toLocaleTimeString();
 }
 
